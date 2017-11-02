@@ -1,13 +1,35 @@
 import React, { Component } from 'react';
 
-class App extends Component {
+class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { error: null, errorInfo: null };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    this.setState({
+      error: error,
+      errorInfo: errorInfo
+    });
+    console.log(
+      `${new Date().getMilliseconds()} - * Component did catch working`
+    );
+    console.log(error, errorInfo);
+  }
+
+  render() {
+    if (this.state.errorInfo) {
+      return <h2>Something went wrong.</h2>;
+    }
+    return this.props.children;
+  }
+}
+
+class ComponentA extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      reRendered: 'false',
-      someProps: 'React Lifecycle',
-      hasError: false,
-      lol: { lol: `I'm working` }
+      reRendered: 'false'
     };
     console.log(`${new Date().getMilliseconds()} - * ComponentA Constructing`);
   }
@@ -24,33 +46,15 @@ class App extends Component {
     console.log(`${new Date().getMilliseconds()} - * ComponentA Will Umount`);
   }
 
-  makeError() {
-    this.setState({ lol: null });
-  }
-
   render() {
     console.log(`${new Date().getMilliseconds()} - * ComponentA Rendering`);
-    if (this.state.hasError) {
-      return <div>Sorry</div>;
-    } else {
-      return (
-        <div>
-          <ComponentB someProps={this.state.lol.lol} />
-          <button onClick={this.makeError.bind(this)}>Make error</button>
-        </div>
-      );
-    }
+    return <div>I'm Component A</div>;
   }
 
   componentDidMount() {
     console.log(`${new Date().getMilliseconds()} - * ComponentA Did Mount`);
     console.log('---- Changing state in component A ----');
     this.setState({ reRendered: 'true' });
-  }
-
-  componentDidCatch(error, errorInfo) {
-    console.log(`${new Date().getMilliseconds()} - * ComponentA Did Catch`);
-    this.setState(state => ({ ...state, hasError: true }));
   }
 
   componentDidUpdate() {
@@ -61,7 +65,7 @@ class App extends Component {
 class ComponentB extends Component {
   constructor(props) {
     super(props);
-
+    this.state = { hasError: false };
     console.log(
       `${new Date().getMilliseconds()} - > * ComponentB Constructing`
     );
@@ -85,12 +89,26 @@ class ComponentB extends Component {
     console.log(`${new Date().getMilliseconds()} - > * ComponentB Will Umount`);
   }
 
+  makeError() {
+    console.log(
+      `${new Date().getMilliseconds()} - > * ComponentB Set hasError to True`
+    );
+    this.setState({ hasError: true });
+  }
+
   render() {
     console.log(`${new Date().getMilliseconds()} - > * ComponentB Rendering`);
+    if (this.state.hasError) {
+      throw new Error('I crashed!');
+    }
     return (
       <b>
         {this.props.someProps} <br />
         <small>See in your console</small>
+        <br />
+        <button onClick={this.makeError.bind(this)}>
+          Make an error here !
+        </button>
       </b>
     );
   }
@@ -109,10 +127,20 @@ class ComponentB extends Component {
   componentDidUpdate() {
     console.log(`${new Date().getMilliseconds()} - > * ComponentB Did Update`);
   }
-
-  componentDidCatch(error, errorInfo) {
-    console.log(`${new Date().getMilliseconds()} - > * ComponentB Did Catch`);
-  }
 }
 
+class App extends Component {
+  render() {
+    return (
+      <div>
+        <ErrorBoundary>
+          <ComponentA />
+        </ErrorBoundary>
+        <ErrorBoundary>
+          <ComponentB someProps={'Im a prop of Component B'} />
+        </ErrorBoundary>
+      </div>
+    );
+  }
+}
 export default App;
