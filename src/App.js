@@ -48,7 +48,7 @@ class ComponentA extends Component {
 
   render() {
     console.log(`${new Date().getMilliseconds()} - * ComponentA Rendering`);
-    return <div>I'm Component A</div>;
+    return <div>Im Component A</div>;
   }
 
   componentDidMount() {
