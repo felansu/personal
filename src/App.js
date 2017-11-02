@@ -18,7 +18,7 @@ class ErrorBoundary extends Component {
   }
 
   render() {
-    if (this.state.errorInfo) {
+    if (this.state.error) {
       return <h2>Something went wrong.</h2>;
     }
     return this.props.children;
@@ -69,6 +69,8 @@ class ComponentB extends Component {
     console.log(
       `${new Date().getMilliseconds()} - > * ComponentB Constructing`
     );
+
+    this.makeError = this.makeError.bind(this);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -106,9 +108,7 @@ class ComponentB extends Component {
         {this.props.someProps} <br />
         <small>See in your console</small>
         <br />
-        <button onClick={this.makeError.bind(this)}>
-          Make an error here !
-        </button>
+        <button onClick={this.makeError}>Make an error here !</button>
       </b>
     );
   }
